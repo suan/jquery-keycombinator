@@ -1,0 +1,19 @@
+<html>
+<head>
+  <meta charset='utf-8'>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="jquery.keycombinator.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $(':text').makeKeyCombinator(function(keyComboData){
+        console.log(keyComboData);
+      });
+    });
+  </script>
+</head>
+<body>
+  <form>
+    Enter a key combination: <input type="text" name="keycombo" />
+  </form>
+</body>
+</html>
