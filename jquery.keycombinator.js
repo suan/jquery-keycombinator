@@ -74,13 +74,17 @@
         eval_key_event(e);
 
         if (released.length && released.matchesSet(pressed)){
-          alert(pressed.join(delimiter));
+          var keyComboData = {
+            comboString: pressed.join(delimiter),
+            comboParts: pressed
+            // comboCodes: 
+          }; 
+          $(this).val(keyComboData.comboString);
+          callback(keyComboData);
           pressed = [];
           released = [];
         }
       });
-
-      callback();
 
     });
   }
