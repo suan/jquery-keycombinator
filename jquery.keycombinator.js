@@ -30,10 +30,8 @@
   }
 
   Array.prototype.matchesSet = function(other){
-    for (var i = 0; i < this.length; i++){
-      if (other.indexOf(this[i]) == -1){ return false; }
-    }
-    return true;
+    return ($(this).not(other).get().length == 0 &&
+            $(other).not(this).get().length == 0);
   };
 
   function eval_key_event(e){
@@ -48,6 +46,8 @@
     if (e.ctrlKey){ set_insert(event_array, ctrl_sign); }
     if (e.altKey){ set_insert(event_array, alt_sign); }
     if (e.shiftKey){ set_insert(event_array, shift_sign); }
+    console.log('pressed', pressed);
+    console.log('released', released);
     // if (e.metaKey){ set_insert(event_array, meta_sign); }
   }
 
@@ -74,6 +74,8 @@
         eval_key_event(e);
 
         if (released.length && released.matchesSet(pressed)){
+          console.log('xpressed', pressed);
+          console.log('xreleased', released);
           var keyComboData = {
             comboString: pressed.join(delimiter),
             comboParts: pressed
