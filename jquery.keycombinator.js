@@ -292,13 +292,14 @@
     };
 
     var allKeyCodes = pressed.keyCodes.concat(released.keyCodes);
+    console.log('allKeyCodes', allKeyCodes);
     // for (i in allKeyCodes){
       // if (getKeyChar(allKeyCodes[i])){
         // set_insert(comboData.comboParts, new ComboPart(allKeyCodes[i]), 'keyCode');
       // }
     // }
     $.each(allKeyCodes, function(i, keyCode){
-      if (getKeyChar(keyCode)){
+      if (getKeyChar(keyCode) != undefined){
         set_insert(comboData.comboParts, new ComboPart(keyCode), 'keyCode');
       }
     });
