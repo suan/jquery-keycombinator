@@ -113,8 +113,8 @@
   function getKeyChar(keyCode){
     console.log('in getKeyChar', keyCode);
     if (key = keys[keyCode]){
-      if (key.all){ return key.all; console.log('getKeyChar if', keyCode);}
-      else{ return key[platform]; console.log('getKeyChar else', keyCode);}
+      if (key.all != undefined){ console.log('getKeyChar if', keyCode); return key.all;}
+      else{ console.log('getKeyChar else', keyCode); return key[platform]; }
     }
       ////// MOD aka toggleable keys
       ////mods: {
@@ -156,15 +156,63 @@
     platform = 'unix';  
   }
 
+  var modifiers = ['ctrlKey', 'altKey', 'shiftKey', 'metaKey'];
+  var modKeyCodes = [17, 18, 16, 91];
   function EventCombo(){
     this.keyCodes = [];
     this.ctrlKey = false;
     this.altKey = false;
     this.shiftKey = false;
     this.metaKey = false;
+    // $.each(modifiers, function(i, modifier){ this[modifier] = false; });
   }
   var pressed = new EventCombo();
   var released = new EventCombo();
+  var eventCombos = [pressed, released];
+
+  function modifiersMatch(){
+    // return !($.grep(modifiers, function(modifier, i){
+      // return pressed[modifier] != released[modifier];
+    // }).length);
+    console.log('mm pressed keyCodes', pressed.keyCodes);
+    console.log('mm released keyCodes', released.keyCodes);
+    for (i in modKeyCodes){
+      var kc = modKeyCodes[i];
+      console.log('kc', kc);
+      if (($.inArray(kc, pressed.keyCodes)>=0 && $.inArray(kc, released.keyCodes)<0) ||
+          ($.inArray(kc, released.keyCodes)>=0 && $.inArray(kc, pressed.keyCodes)<0)){
+        console.log('mm returning false');
+        return false; 
+      }
+    }
+    console.log('mods match!');
+    return true;
+    // for (i in pressed.keyCodes){
+      // var keyCode = pressed.keyCodes[i];
+      // if ($.inArray(modKeyCodes, keyCode) && !$.inArray(released.keyCodes))
+    // }
+    // return true;
+    // return (pressed.ctrlKey == released.ctrlKey &&
+            // pressed.altKey == released.altKey &&
+            // pressed.shiftKey == released.shiftKey &&
+            // pressed.metaKey == released.metaKey);
+  }
+
+  function allModifiers(){
+    // $.each([pressed, released], function(i, eventCombo){
+      // $.each(eventCombo.keyCodes, function(j, keyCode){
+        // if (!$.inArray(keyCode, modKeyCodes)){ console.log('not all mods!'); return false; }
+      // });
+    // });
+    for (i = 0; i < eventCombos.length; i++){
+      var eventCombo = eventCombos[i];
+      for (j = 0; j < eventCombo.keyCodes.length; j++){
+        if ($.inArray(eventCombo.keyCodes[j], modKeyCodes) < 0){ console.log('not all mods!'); return false; }
+      }
+    }
+    console.log('am returning true!');
+    return true;  
+  }
 
   // if 'key' is passed in, it will be used as a key to match objects' uniqueness
   function set_insert(array, value, key){
@@ -185,10 +233,10 @@
     return (num == 20 || (num > 64 && num < 91) || (num > 96 && num < 123));
   }
 
-  Array.prototype.matchesSet = function(other){
-    return ($(this).not(other).get().length == 0 &&
-            $(other).not(this).get().length == 0);
-  };
+  // Array.prototype.matchesSet = function(other){
+    // return ($(this).not(other).get().length == 0 &&
+            // $(other).not(this).get().length == 0);
+  // };
 
   function eval_key_event(e){
     var eventCombo = {keyCodes: []};
@@ -198,7 +246,7 @@
     if (e.type == 'keydown'){ eventCombo = pressed; }
     else { eventCombo = released; }
 
-    if (getKeyChar(e.keyCode)){
+    if (getKeyChar(e.keyCode) != undefined){
       // set_insert(event_array, String.fromCharCode(e.keyCode).toUpperCase());
       set_insert(eventCombo.keyCodes, e.keyCode);
     }
@@ -276,10 +324,15 @@
         eval_key_event(e);
         // return false;
       }).keyup(function(e){
+        console.log('keyup keycode', e.keyCode);
         eval_key_event(e);
 
         // if (released.length && released.matchesSet(pressed)){
-        if (released.keyCodes.length == pressed.keyCodes.length){
+        console.log('am', allModifiers());
+        console.log('!am', !allModifiers());
+        console.log('mm', modifiersMatch() && !allModifiers());
+        if (released.keyCodes.length == pressed.keyCodes.length ||
+            (modifiersMatch() && !allModifiers())){
           console.log('xpressed', pressed);
           console.log('xreleased', released);
           // var keyComboData = {
