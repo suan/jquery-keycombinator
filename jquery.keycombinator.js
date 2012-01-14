@@ -13,6 +13,7 @@
     18: {mac: '⌥', win: 'Alt', unix: 'Alt'},
     // META, on Mac: ⌘ (CMD), on Windows (Win), on Linux (Super)
     91: {mac: '⌘', win: 'Win', unix: 'Super'},
+    224: {mac: '⌘', win: 'Win', unix: 'Super'},   // FF
     // Backspace key, on Mac: ⌫ (Backspace)
     8: {mac: '⌫', win: 'Backspace', unix: 'Backspace'},
     // Tab Key, on Mac: ⇥ (Tab), on Windows ⇆
@@ -157,7 +158,7 @@
   }
 
   var modifiers = ['ctrlKey', 'altKey', 'shiftKey', 'metaKey'];
-  var modKeyCodes = [17, 18, 16, 91];
+  var modKeyCodes = [17, 18, 16, 91, 224];
   function EventCombo(){
     this.keyCodes = [];
     this.ctrlKey = false;
