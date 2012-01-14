@@ -241,8 +241,8 @@
 
   function eval_key_event(e){
     var eventCombo = {keyCodes: []};
-    e.stopPropagation();
-    e.preventDefault();
+    // e.stopPropagation();
+    // e.preventDefault();
     e = e.originalEvent || e;   // TODO: test without this
     if (e.type == 'keydown'){ eventCombo = pressed; }
     else { eventCombo = released; }
@@ -317,12 +317,14 @@
       $(this).keypress(function(e) {
         console.log('keypress keycode', e.keyCode);
         console.log('keypress charCode', e.charCode);
+        console.log(e);
         e.stopPropagation();
         e.preventDefault();
         return false;
       }).keydown(function(e){
         console.log('keydown keycode', e.keyCode);
         console.log('keydown originalEvent keycode', e.originalEvent.keyCode);
+        console.log(e);
         eval_key_event(e);
         // return false;
       }).keyup(function(e){
