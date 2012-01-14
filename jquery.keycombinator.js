@@ -333,8 +333,8 @@
         console.log('am', allModifiers());
         console.log('!am', !allModifiers());
         console.log('mm', modifiersMatch() && !allModifiers());
-        if (released.keyCodes.length == pressed.keyCodes.length ||
-            (modifiersMatch() && !allModifiers())){
+        if (!allModifiers() &&
+          (released.keyCodes.length == pressed.keyCodes.length || modifiersMatch())){
           console.log('xpressed', pressed);
           console.log('xreleased', released);
           // var keyComboData = {
