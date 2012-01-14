@@ -1,0 +1,7 @@
+When released.length == pressed.length (or num keyups == num keydowns?), and
+pressed.length > 1 and
+at least one "normal key (non-unicode)" and one "modifier" (these 2 lines are optional)
+then
+keyCombo is union(mod keys from released and pressed) + "normal key (wherever it is)"
+
+What to do if jwerty doesn't recognize it? (should recognize anything that is correct onKeyDown and outside of a textbox)
