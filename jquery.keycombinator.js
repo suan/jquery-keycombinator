@@ -256,13 +256,13 @@
     // if (e.altKey){ set_insert(event_array, alt_sign); }
     // if (e.shiftKey){ set_insert(event_array, shift_sign); }
     // TODO: Test using metakey instead of this
-    if (e.keyCode == 91){ eventCombo.metaKey = true; }
+    // if (e.keyCode == 91){ eventCombo.metaKey = true; }
+    if (e.metaKey){ eventCombo.metaKey = true; }
     if (e.ctrlKey){ eventCombo.ctrlKey = true; }
     if (e.altKey){ eventCombo.altKey = true; }
     if (e.shiftKey){ eventCombo.shiftKey = true; }
     console.log('pressed', pressed);
     console.log('released', released);
-    // if (e.metaKey){ set_insert(event_array, meta_sign); }
   }
 
   // $(document).keypress(function(e) {
