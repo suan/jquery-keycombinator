@@ -329,6 +329,7 @@
         // return false;
       }).keyup(function(e){
         console.log('keyup keycode', e.keyCode);
+        console.log(e);
         eval_key_event(e);
 
         // if (released.length && released.matchesSet(pressed)){
