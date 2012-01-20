@@ -1,3 +1,25 @@
+////$(document).ready(function(){
+      ////$(window).keypress(function(e) {
+        ////console.log('doc keypress keycode', e.keyCode);
+        ////console.log('doc keypress charCode', e.charCode);
+        ////console.log(e);
+    ////// e.stopPropagation();
+    ////// e.preventDefault();
+      ////}).keydown(function(e){
+        ////console.log('doc keydown keycode', e.keyCode);
+        ////console.log('doc keydown originalEvent keycode', e.originalEvent.keyCode);
+        ////console.log(e);
+    ////// e.stopPropagation();
+    ////// e.preventDefault();
+      ////}).keyup(function(e){
+        ////console.log('doc keyup keycode', e.keyCode);
+        ////console.log('doc keyup charCode', e.charCode);
+        ////console.log(e);
+    ////// e.stopPropagation();
+    ////// e.preventDefault();
+      ////});
+////});
+
 (function($){
 
   ////// Private
@@ -144,14 +166,9 @@
   if (rawPlatform.indexOf('mac') >= 0){
     platform = 'mac';
     delimiter = '';
-    // shift_sign = '⇧';
-    // meta_sign = '⌘';
-    // ctrl_sign = '^';
-    // alt_sign = '⌥';
   }
   else if (rawPlatform.indexOf('win') >= 0){
     platform = 'win';
-    // meta_sign = 'win';
   }
   else{
     platform = 'unix';  
@@ -165,16 +182,12 @@
     this.altKey = false;
     this.shiftKey = false;
     this.metaKey = false;
-    // $.each(modifiers, function(i, modifier){ this[modifier] = false; });
   }
   var pressed = new EventCombo();
   var released = new EventCombo();
   var eventCombos = [pressed, released];
 
   function modifiersMatch(){
-    // return !($.grep(modifiers, function(modifier, i){
-      // return pressed[modifier] != released[modifier];
-    // }).length);
     console.log('mm pressed keyCodes', pressed.keyCodes);
     console.log('mm released keyCodes', released.keyCodes);
     for (i in modKeyCodes){
@@ -188,23 +201,9 @@
     }
     console.log('mods match!');
     return true;
-    // for (i in pressed.keyCodes){
-      // var keyCode = pressed.keyCodes[i];
-      // if ($.inArray(modKeyCodes, keyCode) && !$.inArray(released.keyCodes))
-    // }
-    // return true;
-    // return (pressed.ctrlKey == released.ctrlKey &&
-            // pressed.altKey == released.altKey &&
-            // pressed.shiftKey == released.shiftKey &&
-            // pressed.metaKey == released.metaKey);
   }
 
   function allModifiers(){
-    // $.each([pressed, released], function(i, eventCombo){
-      // $.each(eventCombo.keyCodes, function(j, keyCode){
-        // if (!$.inArray(keyCode, modKeyCodes)){ console.log('not all mods!'); return false; }
-      // });
-    // });
     for (i = 0; i < eventCombos.length; i++){
       var eventCombo = eventCombos[i];
       for (j = 0; j < eventCombo.keyCodes.length; j++){
@@ -230,15 +229,6 @@
     if (!alreadyPresent){ array.push(value); }
   }
 
-  function is_ascii(num){
-    return (num == 20 || (num > 64 && num < 91) || (num > 96 && num < 123));
-  }
-
-  // Array.prototype.matchesSet = function(other){
-    // return ($(this).not(other).get().length == 0 &&
-            // $(other).not(this).get().length == 0);
-  // };
-
   function eval_key_event(e){
     var eventCombo = {keyCodes: []};
     // e.stopPropagation();
@@ -248,15 +238,8 @@
     else { eventCombo = released; }
 
     if (getKeyChar(e.keyCode) != undefined){
-      // set_insert(event_array, String.fromCharCode(e.keyCode).toUpperCase());
       set_insert(eventCombo.keyCodes, e.keyCode);
     }
-    // if (e.keyCode == 91){ set_insert(event_array, meta_sign); }
-    // if (e.ctrlKey){ set_insert(event_array, ctrl_sign); }
-    // if (e.altKey){ set_insert(event_array, alt_sign); }
-    // if (e.shiftKey){ set_insert(event_array, shift_sign); }
-    // TODO: Test using metakey instead of this
-    // if (e.keyCode == 91){ eventCombo.metaKey = true; }
     if (e.metaKey){ eventCombo.metaKey = true; }
     if (e.ctrlKey){ eventCombo.ctrlKey = true; }
     if (e.altKey){ eventCombo.altKey = true; }
@@ -264,19 +247,6 @@
     console.log('pressed', pressed);
     console.log('released', released);
   }
-
-  // $(document).keypress(function(e) {
-  // }).keydown(function(e){
-    // eval_key_event(e);
-  // }).keyup(function(e){
-    // eval_key_event(e);
-// 
-  // if (released.length && released.matchesSet(pressed)){
-    // alert(pressed.join(delimiter));
-    // pressed = [];
-    // released = [];
-  // }
-  // });
 
   function ComboPart(keyCode){
     this.keyCode = keyCode;
@@ -294,11 +264,6 @@
 
     var allKeyCodes = pressed.keyCodes.concat(released.keyCodes);
     console.log('allKeyCodes', allKeyCodes);
-    // for (i in allKeyCodes){
-      // if (getKeyChar(allKeyCodes[i])){
-        // set_insert(comboData.comboParts, new ComboPart(allKeyCodes[i]), 'keyCode');
-      // }
-    // }
     $.each(allKeyCodes, function(i, keyCode){
       if (getKeyChar(keyCode) != undefined){
         set_insert(comboData.comboParts, new ComboPart(keyCode), 'keyCode');
@@ -311,23 +276,66 @@
     return comboData;
   }
 
+  function checkAndComplete($textbox, callback){
+    if (!allModifiers() &&
+      (released.keyCodes.length == pressed.keyCodes.length || modifiersMatch())){
+      console.log('xpressed', pressed);
+      console.log('xreleased', released);
+      var keyComboData = buildComboData();
+      console.log('textbox', $textbox);
+      console.log(keyComboData.comboString);
+      $textbox.blur();  // needed for FF mac accent key hack
+      $textbox.val(keyComboData.comboString);
+      $textbox.focus();
+      callback(keyComboData);
+      pressed = new EventCombo();
+      released = new EventCombo();
+    }
+    return false;
+  }
+
   $.fn.makeKeyCombinator = function(callback){
     return this.each(function(){
+      $(this).change(function(e){
+        console.log('changed', e);
+        console.log('changed val', $(this).val());
+      });
 
       $(this).keypress(function(e) {
         console.log('keypress keycode', e.keyCode);
         console.log('keypress charCode', e.charCode);
         console.log(e);
-        e.stopPropagation();
-        e.preventDefault();
-        return false;
-      }).keydown(function(e){
+        // e.stopPropagation();
+        // e.preventDefault();
+        // return false;
+      });
+      
+      $(this).keydown(function(e){
         console.log('keydown keycode', e.keyCode);
         console.log('keydown originalEvent keycode', e.originalEvent.keyCode);
         console.log(e);
+        if (this.value == "¨"){ console.log('double dot detected'); }
+        console.log(this.value);
+        console.log($(this));
         eval_key_event(e);
-        // return false;
-      }).keyup(function(e){
+        if (e.keyCode == 18){
+          var $textbox = $(this);
+          var timer = setTimeout(function(){
+            console.log('timer tick');
+            if ($textbox.val() == "¨"){
+              clearTimeout(timer);
+              console.log('timer found double dots!');
+              set_insert(pressed.keyCodes, 85);
+              set_insert(released.keyCodes, 18);
+              checkAndComplete($textbox, callback);
+              // $textbox.trigger(jQuery.Event('keyup', { which: 85 }));
+            }
+          }, 150);
+        }
+        return false;
+      });
+      
+      $(this).keyup(function(e){
         console.log('keyup keycode', e.keyCode);
         console.log(e);
         eval_key_event(e);
@@ -336,19 +344,7 @@
         console.log('am', allModifiers());
         console.log('!am', !allModifiers());
         console.log('mm', modifiersMatch() && !allModifiers());
-        if (!allModifiers() &&
-          (released.keyCodes.length == pressed.keyCodes.length || modifiersMatch())){
-          console.log('xpressed', pressed);
-          console.log('xreleased', released);
-          // var keyComboData = {
-            // comboString: pressed.join(delimiter),
-          // }; 
-          var keyComboData = buildComboData();
-          $(this).val(keyComboData.comboString);
-          callback(keyComboData);
-          pressed = new EventCombo();
-          released = new EventCombo();
-        }
+        checkAndComplete($(this), callback);
         return false;
       });
 
