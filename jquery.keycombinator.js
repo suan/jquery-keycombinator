@@ -132,6 +132,14 @@
       // _keys.keys[String.fromCharCode(i).toLowerCase()] = i;
     keys[i] = {all: String.fromCharCode(i).toUpperCase()};
   }
+
+  var accents = {
+    '¨': 85,    // U
+    '´': 69,    // E
+    '`': 192,   // `
+    'ˆ': 73,    // I
+    '˜': 78     // N
+  };
     
   function getKeyChar(keyCode){
     console.log('in getKeyChar', keyCode);
@@ -286,7 +294,7 @@
       console.log(keyComboData.comboString);
       $textbox.blur();  // needed for FF mac accent key hack
       $textbox.val(keyComboData.comboString);
-      $textbox.focus();
+      $textbox.select();
       callback(keyComboData);
       pressed = new EventCombo();
       released = new EventCombo();
@@ -322,15 +330,17 @@
           var $textbox = $(this);
           var timer = setTimeout(function(){
             console.log('timer tick');
-            if ($textbox.val() == "¨"){
+            if (undetected_key = accents[$textbox.val()]){
               clearTimeout(timer);
-              console.log('timer found double dots!');
-              set_insert(pressed.keyCodes, 85);
+              console.log('timer found accent!');
+              set_insert(pressed.keyCodes, undetected_key);
               set_insert(released.keyCodes, 18);
               checkAndComplete($textbox, callback);
               // $textbox.trigger(jQuery.Event('keyup', { which: 85 }));
             }
           }, 150);
+          // TODO: Solve case where user presses next key long time after 'Alt'
+          // probably need to make this recurring, and clear it from other events
         }
         return false;
       });
