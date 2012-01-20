@@ -142,10 +142,10 @@
   };
     
   function getKeyChar(keyCode){
-    console.log('in getKeyChar', keyCode);
+    // console.log('in getKeyChar', keyCode);
     if (key = keys[keyCode]){
-      if (key.all != undefined){ console.log('getKeyChar if', keyCode); return key.all;}
-      else{ console.log('getKeyChar else', keyCode); return key[platform]; }
+      if (key.all != undefined){return key.all;}
+      else{ return key[platform]; }
     }
       ////// MOD aka toggleable keys
       ////mods: {
@@ -184,43 +184,16 @@
 
   var modifiers = ['ctrlKey', 'altKey', 'shiftKey', 'metaKey'];
   var modKeyCodes = [17, 18, 16, 91, 224];
-  function EventCombo(){
-    this.keyCodes = [];
-    this.ctrlKey = false;
-    this.altKey = false;
-    this.shiftKey = false;
-    this.metaKey = false;
-  }
-  var pressed = new EventCombo();
-  var released = new EventCombo();
-  var eventCombos = [pressed, released];
-
-  function modifiersMatch(){
-    console.log('mm pressed keyCodes', pressed.keyCodes);
-    console.log('mm released keyCodes', released.keyCodes);
-    for (i in modKeyCodes){
-      var kc = modKeyCodes[i];
-      console.log('kc', kc);
-      if (($.inArray(kc, pressed.keyCodes)>=0 && $.inArray(kc, released.keyCodes)<0) ||
-          ($.inArray(kc, released.keyCodes)>=0 && $.inArray(kc, pressed.keyCodes)<0)){
-        console.log('mm returning false');
-        return false; 
-      }
-    }
-    console.log('mods match!');
-    return true;
-  }
-
-  function allModifiers(){
-    for (i = 0; i < eventCombos.length; i++){
-      var eventCombo = eventCombos[i];
-      for (j = 0; j < eventCombo.keyCodes.length; j++){
-        if ($.inArray(eventCombo.keyCodes[j], modKeyCodes) < 0){ console.log('not all mods!'); return false; }
-      }
-    }
-    console.log('am returning true!');
-    return true;  
-  }
+  // function EventCombo(){
+    // this.keyCodes = [];
+    // this.ctrlKey = false;
+    // this.altKey = false;
+    // this.shiftKey = false;
+    // this.metaKey = false;
+  // }
+  // var pressed = new EventCombo();
+  // var released = new EventCombo();
+  // var eventCombos = [pressed, released];
 
   // if 'key' is passed in, it will be used as a key to match objects' uniqueness
   function set_insert(array, value, key){
@@ -237,124 +210,113 @@
     if (!alreadyPresent){ array.push(value); }
   }
 
-  function eval_key_event(e){
-    var eventCombo = {keyCodes: []};
+  function isModifier(keyCode){
+    return ($.inArray(keyCode, modKeyCodes) >= 0)
+  }
+
+  function eval_key_event(e, $textbox, callback){
     // e.stopPropagation();
     // e.preventDefault();
-    e = e.originalEvent || e;   // TODO: test without this
-    if (e.type == 'keydown'){ eventCombo = pressed; }
-    else { eventCombo = released; }
+    // e = e.originalEvent || e;   // TODO: test without this
 
+    var startComboLength = comboData.comboString.length;
     if (getKeyChar(e.keyCode) != undefined){
-      set_insert(eventCombo.keyCodes, e.keyCode);
+      set_insert(comboData.comboParts, new ComboPart(e.keyCode), 'keyCode');
     }
-    if (e.metaKey){ eventCombo.metaKey = true; }
-    if (e.ctrlKey){ eventCombo.ctrlKey = true; }
-    if (e.altKey){ eventCombo.altKey = true; }
-    if (e.shiftKey){ eventCombo.shiftKey = true; }
-    console.log('pressed', pressed);
-    console.log('released', released);
+    if (e.metaKey){ comboData.metaKey = true; }
+    if (e.ctrlKey){ comboData.ctrlKey = true; }
+    if (e.altKey){ comboData.altKey = true; }
+    if (e.shiftKey){ comboData.shiftKey = true; }
+    comboData.comboString = $.map(comboData.comboParts, function(comboPart, i){
+                              return comboPart.keyChar;
+                            }).join(delimiter);
+    console.log('evaled comboData', comboData);
+    if (comboData.comboString.length > startComboLength){
+      console.log('updating val');
+      // $textbox.blur();  // needed for FF mac accent key hack
+      $textbox.val(comboData.comboString);
+      if (!isModifier(e.keyCode)){
+        console.log('completing sequence');
+        $textbox.select();
+        completed = true;
+        callback(comboData);
+        comboData = new ComboData();
+      }
+    }
   }
 
   function ComboPart(keyCode){
     this.keyCode = keyCode;
     this.keyChar = getKeyChar(keyCode);
   }
-
-  function buildComboData(){
-    var comboData = {
-      comboParts: [],
-      ctrlKey: pressed.ctrlKey || released.ctrlKey,
-      altKey: pressed.altKey || released.altKey,
-      metaKey: pressed.metaKey || released.metaKey,
-      shiftKey: pressed.shiftKey || released.shiftKey  
-    };
-
-    var allKeyCodes = pressed.keyCodes.concat(released.keyCodes);
-    console.log('allKeyCodes', allKeyCodes);
-    $.each(allKeyCodes, function(i, keyCode){
-      if (getKeyChar(keyCode) != undefined){
-        set_insert(comboData.comboParts, new ComboPart(keyCode), 'keyCode');
-      }
-    });
-    comboData.comboString = $.map(comboData.comboParts, function(comboPart, i){
-                              return comboPart.keyChar;
-                            }).join(delimiter);
-    
-    return comboData;
+  function ComboData(){
+    this.comboParts= [];
+    this.ctrlKey = false;
+    this.altKey = false;
+    this.metaKey = false;
+    this.shiftKey = false;
+    this.comboString = '';
   }
 
+  var comboData = new ComboData();
+  var completed = false;
+
   function checkAndComplete($textbox, callback){
-    if (!allModifiers() &&
-      (released.keyCodes.length == pressed.keyCodes.length || modifiersMatch())){
-      console.log('xpressed', pressed);
-      console.log('xreleased', released);
-      var keyComboData = buildComboData();
-      console.log('textbox', $textbox);
-      console.log(keyComboData.comboString);
-      $textbox.blur();  // needed for FF mac accent key hack
-      $textbox.val(keyComboData.comboString);
-      $textbox.select();
-      callback(keyComboData);
-      pressed = new EventCombo();
-      released = new EventCombo();
-    }
+    console.log('xpressed', pressed);
+    console.log('xreleased', released);
+    var keyComboData = buildComboData();
+    console.log('textbox', $textbox);
+    console.log(keyComboData.comboString);
+    $textbox.blur();  // needed for FF mac accent key hack
+    $textbox.val(keyComboData.comboString);
+    $textbox.select();
+    callback(keyComboData);
+    pressed = new EventCombo();
+    released = new EventCombo();
     return false;
   }
 
   $.fn.makeKeyCombinator = function(callback){
     return this.each(function(){
-      $(this).change(function(e){
-        console.log('changed', e);
-        console.log('changed val', $(this).val());
-      });
-
-      $(this).keypress(function(e) {
-        console.log('keypress keycode', e.keyCode);
-        console.log('keypress charCode', e.charCode);
-        console.log(e);
-        // e.stopPropagation();
-        // e.preventDefault();
-        // return false;
-      });
+      ////$(this).keypress(function(e) {
+        ////console.log('keypress keycode', e.keyCode);
+        ////console.log('keypress charCode', e.charCode);
+        ////console.log(e);
+        ////// e.stopPropagation();
+        ////// e.preventDefault();
+        ////// return false;
+      ////});
       
       $(this).keydown(function(e){
         console.log('keydown keycode', e.keyCode);
         console.log('keydown originalEvent keycode', e.originalEvent.keyCode);
         console.log(e);
-        if (this.value == "¨"){ console.log('double dot detected'); }
-        console.log(this.value);
-        console.log($(this));
-        eval_key_event(e);
-        if (e.keyCode == 18){
-          var $textbox = $(this);
-          var timer = setTimeout(function(){
-            console.log('timer tick');
-            if (undetected_key = accents[$textbox.val()]){
-              clearTimeout(timer);
-              console.log('timer found accent!');
-              set_insert(pressed.keyCodes, undetected_key);
-              set_insert(released.keyCodes, 18);
-              checkAndComplete($textbox, callback);
-              // $textbox.trigger(jQuery.Event('keyup', { which: 85 }));
-            }
-          }, 150);
+        completed = false;
+        eval_key_event(e, $(this), callback);
+        // if (e.keyCode == 18){
+          // var $textbox = $(this);
+          // var timer = setTimeout(function(){
+            // console.log('timer tick');
+            // if (undetected_key = accents[$textbox.val()]){
+              // clearTimeout(timer);
+              // console.log('timer found accent!');
+              // set_insert(pressed.keyCodes, undetected_key);
+              // set_insert(released.keyCodes, 18);
+              // checkAndComplete($textbox, callback);
+            // }
+          // }, 150);
           // TODO: Solve case where user presses next key long time after 'Alt'
           // probably need to make this recurring, and clear it from other events
-        }
+        // }
         return false;
       });
       
       $(this).keyup(function(e){
         console.log('keyup keycode', e.keyCode);
         console.log(e);
-        eval_key_event(e);
+        if (!completed){ eval_key_event(e, $(this), callback); }
 
-        // if (released.length && released.matchesSet(pressed)){
-        console.log('am', allModifiers());
-        console.log('!am', !allModifiers());
-        console.log('mm', modifiersMatch() && !allModifiers());
-        checkAndComplete($(this), callback);
+        // checkAndComplete($(this), callback);
         return false;
       });
 
