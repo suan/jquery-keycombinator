@@ -203,14 +203,20 @@
       $textbox.blur();  // needed for FF mac accent key hack
       $textbox.val(comboData.comboString);
       $textbox.focus();
+      console.log('keydowns', keydowns);
+      console.log('keyups', keyups);
       if (!isModifier(e.keyCode)){
         console.log('completing sequence');
         $textbox.select();
         completed = true;
+        keyups = 0;
+        keydowns = 0;
+        loopingTimer.stop();
         callback(comboData);
         comboData = new ComboData();
       }
     }
+    else if (keyups == keydowns){ reset($textbox); }
   }
   
   var loopingTimer = {
@@ -240,6 +246,15 @@
     startTime: null
   }
 
+  function reset($textbox){
+    $textbox.val('');
+    completed = false;
+    comboData = new ComboData();
+    loopingTimer.stop();
+    keydowns = 0;
+    keyups = 0;    
+  }
+
   function ComboPart(keyCode){
     this.keyCode = keyCode;
     this.keyChar = getKeyChar(keyCode);
@@ -255,6 +270,8 @@
 
   var comboData = new ComboData();
   var completed = false;
+  var keydowns = 0;
+  var keyups = 0;
 
   $.fn.makeKeyCombinator = function(callback){
     return this.each(function(){
@@ -272,6 +289,7 @@
         console.log('keydown originalEvent keycode', e.originalEvent.keyCode);
         console.log(e);
         completed = false;
+        keydowns += 1;
         var $textbox = $(this);
         eval_key_event(e, $textbox, callback);
         if (e.keyCode == 18 && comboData.comboString == getKeyChar(18)){
@@ -295,7 +313,10 @@
       $(this).keyup(function(e){
         console.log('keyup keycode', e.keyCode);
         console.log(e);
-        if (!completed){ eval_key_event(e, $(this), callback); }
+        if (!completed){
+          keyups += 1;
+          eval_key_event(e, $(this), callback);
+        }
 
         // checkAndComplete($(this), callback);
         return false;
