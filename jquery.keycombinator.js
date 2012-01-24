@@ -120,7 +120,6 @@
   };
     
   function getKeyChar(keyCode){
-    // console.log('in getKeyChar', keyCode);
     if (key = keys[keyCode]){
       if (key.all != undefined){return key.all;}
       else{ return key[platform]; }
@@ -183,7 +182,6 @@
   function eval_key_event(e, $textbox, callback){
     // e.stopPropagation();
     // e.preventDefault();
-    // e = e.originalEvent || e;   // TODO: test without this
 
     loopingTimer.stop();
     var startComboLength = comboData.comboString.length;
@@ -197,16 +195,11 @@
     comboData.comboString = $.map(comboData.comboParts, function(comboPart, i){
                               return comboPart.keyChar;
                             }).join(delimiter);
-    console.log('evaled comboData', comboData);
     if (comboData.comboString.length > startComboLength){
-      console.log('updating val');
       $textbox.blur();  // needed for FF mac accent key hack
       $textbox.val(comboData.comboString);
       $textbox.focus();
-      console.log('keydowns', keydowns);
-      console.log('keyups', keyups);
       if (!isModifier(e.keyCode)){
-        console.log('completing sequence');
         $textbox.select();
         completed = true;
         keyups = 0;
@@ -221,17 +214,13 @@
   
   var loopingTimer = {
     run: function(task, interval, duration){
-      console.log('in run');
       if (!loopingTimer.startTime){
         loopingTimer.startTime = (new Date().getTime());
-        console.log('starting lala...');
         loopingTimer.running = setInterval(function(){
           loopingTimer.run(task, interval, duration);
         }, interval);
       }
       else if (((new Date()).getTime() - loopingTimer.startTime) < duration){
-        console.log((new Date()).getTime() - loopingTimer.startTime);
-        console.log(duration);
         task();
       }
       else {
@@ -275,32 +264,17 @@
 
   $.fn.makeKeyCombinator = function(callback){
     return this.each(function(){
-      ////$(this).keypress(function(e) {
-        ////console.log('keypress keycode', e.keyCode);
-        ////console.log('keypress charCode', e.charCode);
-        ////console.log(e);
-        ////// e.stopPropagation();
-        ////// e.preventDefault();
-        ////// return false;
-      ////});
-      
       $(this).keydown(function(e){
-        console.log('keydown keycode', e.keyCode);
-        console.log('keydown originalEvent keycode', e.originalEvent.keyCode);
-        console.log(e);
         completed = false;
         keydowns += 1;
         var $textbox = $(this);
         eval_key_event(e, $textbox, callback);
         if (e.keyCode == 18 && comboData.comboString == getKeyChar(18)){
-          console.log('wanna start timer');
           var $textbox = $(this);
           loopingTimer.run(function(){
-            console.log('timer tick');
             var contents = $textbox.val();
             if (undetected_key = accents[contents[contents.length - 1]]){
               loopingTimer.stop();
-              console.log('timer found accent!');
               eval_key_event(new $.Event('keydown', {keyCode: undetected_key}),
                               $textbox,
                               callback);
@@ -311,18 +285,19 @@
       });
       
       $(this).keyup(function(e){
-        console.log('keyup keycode', e.keyCode);
-        console.log(e);
         if (!completed){
           keyups += 1;
           eval_key_event(e, $(this), callback);
         }
 
-        // checkAndComplete($(this), callback);
         return false;
       });
 
     });
+  }
+
+  $.fn.clearKeyCombinator = function(){
+    return this.each(function(){ reset($(this)) }); 
   }
 
 })(jQuery);
