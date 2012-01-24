@@ -261,9 +261,12 @@
   var completed = false;
   var keydowns = 0;
   var keyups = 0;
+  var defaultCombo;
 
-  $.fn.makeKeyCombinator = function(callback){
+  $.fn.makeKeyCombinator = function(_defaultCombo, callback){
     return this.each(function(){
+      defaultCombo = _defaultCombo;
+
       $(this).keydown(function(e){
         completed = false;
         keydowns += 1;
@@ -289,15 +292,23 @@
           keyups += 1;
           eval_key_event(e, $(this), callback);
         }
-
         return false;
       });
+
+      $(this).click(function(e){ $(this).select(); });
 
     });
   }
 
   $.fn.clearKeyCombinator = function(){
     return this.each(function(){ reset($(this)) }); 
+  }
+
+  $.fn.defaultKeyCombinator = function(){
+    return this.each(function(){
+      reset($(this));
+      $(this).val(defaultCombo);
+    }); 
   }
 
 })(jQuery);
