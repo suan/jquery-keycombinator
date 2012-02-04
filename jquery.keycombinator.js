@@ -205,7 +205,7 @@
         keyups = 0;
         keydowns = 0;
         loopingTimer.stop();
-        callback(comboData);
+        if(callback){ callback(comboData); }
         comboData = new ComboData();
       }
     }
@@ -245,8 +245,10 @@
   }
 
   function ComboPart(keyCode){
-    this.keyCode = keyCode;
-    this.keyChar = getKeyChar(keyCode);
+    if (keyCode !== undefined){
+      this.keyCode = keyCode;
+      this.keyChar = getKeyChar(keyCode);
+    }
   }
   function ComboData(){
     this.comboParts= [];
@@ -262,16 +264,18 @@
   var keydowns = 0;
   var keyups = 0;
   var defaultCombo;
+  var onComplete;
 
-  $.fn.makeKeyCombinator = function(_defaultCombo, callback){
+  $.fn.makeKeyCombinator = function(options){
     return this.each(function(){
-      defaultCombo = _defaultCombo;
+      defaultCombo = options.defaultCombos;
+      onComplete = options.onComplete;
 
       $(this).keydown(function(e){
         completed = false;
         keydowns += 1;
         var $textbox = $(this);
-        eval_key_event(e, $textbox, callback);
+        eval_key_event(e, $textbox, onComplete);
         if (e.keyCode == 18 && comboData.comboString == getKeyChar(18)){
           var $textbox = $(this);
           loopingTimer.run(function(){
@@ -280,7 +284,7 @@
               loopingTimer.stop();
               eval_key_event(new $.Event('keydown', {keyCode: undetected_key}),
                               $textbox,
-                              callback);
+                              onComplete);
             }
           }, 10, 10000);
         }
@@ -290,13 +294,12 @@
       $(this).keyup(function(e){
         if (!completed){
           keyups += 1;
-          eval_key_event(e, $(this), callback);
+          eval_key_event(e, $(this), onComplete);
         }
         return false;
       });
 
       $(this).click(function(e){ $(this).select(); });
-
     });
   }
 
@@ -307,7 +310,15 @@
   $.fn.defaultKeyCombinator = function(){
     return this.each(function(){
       reset($(this));
-      $(this).val(defaultCombo);
+      for (keyChar in defaultCombo[platform]){
+        comboPart = new ComboPart();
+        comboPart.keyChar = keyChar;
+        set_insert(comboData.comboParts, comboPart, 'keyChar');
+      }
+      comboData.comboString = defaultCombo[platform].join(delimiter);
+      $(this).val(defaultCombo[platform].join(delimiter));
+      if(onComplete){ onComplete(comboData); }
+      comboData = new ComboData();
     }); 
   }
 
