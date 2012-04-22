@@ -1,28 +1,8 @@
-// the plugin logic hasn't been nested in a jQuery plugin. Instead, we just use
-// jQuery for its instantiation.
-;(function($, window, document, undefined){
+(function($){
 
-  // our plugin constructor
-  var KeyCombinator = function( elem, options ){
-      this.elem = elem;
-      this.$elem = $(elem);
-      this.options = options;
-
-      // This next line takes advantage of HTML5 data attributes
-      // to support customization of the plugin on a per-element
-      // basis. For example,
-      // <div class=item' data-plugin-options='{"message":"Goodbye World!"}'></div>
-      this.metadata = this.$elem.data( 'keycombinator-options' );
-    };
-
-
-
-
-
-  // ================= "globals" ====================================
   ////// Private
   ////var _modProps = { 16: 'shiftKey', 17: 'ctrlKey', 18: 'altKey', 91: 'metaKey' };
-      
+
   var keys = {
     // Shift key, ⇧
     // '⇧': 16, shift: 16,
@@ -130,12 +110,19 @@
       // _keys.keys[String.fromCharCode(i).toLowerCase()] = i;
     keys[i] = {all: String.fromCharCode(i).toUpperCase()};
   }
+
+  var accents = {
+    '¨': 85,    // U
+    '´': 69,    // E
+    '`': 192,   // `
+    'ˆ': 73,    // I
+    '˜': 78     // N
+  };
     
   function getKeyChar(keyCode){
-    console.log('in getKeyChar', keyCode);
     if (key = keys[keyCode]){
-      if (key.all != undefined){ console.log('getKeyChar if', keyCode); return key.all;}
-      else{ console.log('getKeyChar else', keyCode); return key[platform]; }
+      if (key.all != undefined){return key.all;}
+      else{ return key[platform]; }
     }
       ////// MOD aka toggleable keys
       ////mods: {
@@ -149,10 +136,8 @@
           ////// META, on Mac: ⌘ (CMD), on Windows (Win), on Linux (Super)
           ////'⌘': 91, meta: 91, cmd: 91, 'super': 91, win: 91
       ////},
-      
-      // Normal keys
   }
-
+    
   var delimiter = '+';
   var shift_sign = 'shift';
   var meta_sign = 'super';
@@ -164,14 +149,9 @@
   if (rawPlatform.indexOf('mac') >= 0){
     platform = 'mac';
     delimiter = '';
-    // shift_sign = '⇧';
-    // meta_sign = '⌘';
-    // ctrl_sign = '^';
-    // alt_sign = '⌥';
   }
   else if (rawPlatform.indexOf('win') >= 0){
     platform = 'win';
-    // meta_sign = 'win';
   }
   else{
     platform = 'unix';  
@@ -179,222 +159,167 @@
 
   var modifiers = ['ctrlKey', 'altKey', 'shiftKey', 'metaKey'];
   var modKeyCodes = [17, 18, 16, 91, 224];
-  function EventCombo(){
-    this.keyCodes = [];
-    this.ctrlKey = false;
-    this.altKey = false;
-    this.shiftKey = false;
-    this.metaKey = false;
-    // $.each(modifiers, function(i, modifier){ this[modifier] = false; });
+
+  // if 'key' is passed in, it will be used as a key to match objects' uniqueness
+  function set_insert(array, value, key){
+    var alreadyPresent = false;
+
+    if (key === undefined){
+      if ($.inArray(value, array) >= 0){ alreadyPresent = true; }
+    }
+    else if ($.grep(array,
+                    function(obj){ return obj[key] == value[key]; }).length){
+      alreadyPresent = true;
+    }
+
+    if (!alreadyPresent){ array.push(value); }
   }
 
-  // ================= /"globals" ====================================
+  function isModifier(keyCode){
+    return ($.inArray(keyCode, modKeyCodes) >= 0)
+  }
 
+  function eval_key_event(e, $textbox, callback){
+    // e.stopPropagation();
+    // e.preventDefault();
 
-
-
-
-  KeyCombinator.prototype = {
-    var pressed = new EventCombo();
-    var released = new EventCombo();
-    var eventCombos = [pressed, released];
-
-    function modifiersMatch(){
-      // return !($.grep(modifiers, function(modifier, i){
-        // return pressed[modifier] != released[modifier];
-      // }).length);
-      console.log('mm pressed keyCodes', pressed.keyCodes);
-      console.log('mm released keyCodes', released.keyCodes);
-      for (i in modKeyCodes){
-        var kc = modKeyCodes[i];
-        console.log('kc', kc);
-        if (($.inArray(kc, pressed.keyCodes)>=0 && $.inArray(kc, released.keyCodes)<0) ||
-            ($.inArray(kc, released.keyCodes)>=0 && $.inArray(kc, pressed.keyCodes)<0)){
-          console.log('mm returning false');
-          return false; 
-        }
-      }
-      console.log('mods match!');
-      return true;
-      // for (i in pressed.keyCodes){
-        // var keyCode = pressed.keyCodes[i];
-        // if ($.inArray(modKeyCodes, keyCode) && !$.inArray(released.keyCodes))
-      // }
-      // return true;
-      // return (pressed.ctrlKey == released.ctrlKey &&
-              // pressed.altKey == released.altKey &&
-              // pressed.shiftKey == released.shiftKey &&
-              // pressed.metaKey == released.metaKey);
+    loopingTimer.stop();
+    var startComboLength = comboData.comboString.length;
+    if (getKeyChar(e.keyCode) != undefined){
+      set_insert(comboData.comboParts, new ComboPart(e.keyCode), 'keyCode');
     }
-
-    function allModifiers(){
-      // $.each([pressed, released], function(i, eventCombo){
-        // $.each(eventCombo.keyCodes, function(j, keyCode){
-          // if (!$.inArray(keyCode, modKeyCodes)){ console.log('not all mods!'); return false; }
-        // });
-      // });
-      for (i = 0; i < eventCombos.length; i++){
-        var eventCombo = eventCombos[i];
-        for (j = 0; j < eventCombo.keyCodes.length; j++){
-          if ($.inArray(eventCombo.keyCodes[j], modKeyCodes) < 0){ console.log('not all mods!'); return false; }
-        }
+    if (e.metaKey){ comboData.metaKey = true; }
+    if (e.ctrlKey){ comboData.ctrlKey = true; }
+    if (e.altKey){ comboData.altKey = true; }
+    if (e.shiftKey){ comboData.shiftKey = true; }
+    comboData.comboString = $.map(comboData.comboParts, function(comboPart, i){
+                              return comboPart.keyChar;
+                            }).join(delimiter);
+    if (comboData.comboString.length > startComboLength){
+      $textbox.blur();  // needed for FF mac accent key hack
+      $textbox.val(comboData.comboString);
+      $textbox.focus();
+      if (!isModifier(e.keyCode)){
+        $textbox.select();
+        completed = true;
+        keyups = 0;
+        keydowns = 0;
+        loopingTimer.stop();
+        if(callback){ callback(comboData); }
+        comboData = new ComboData();
       }
-      console.log('am returning true!');
-      return true;  
     }
-
-    // if 'key' is passed in, it will be used as a key to match objects' uniqueness
-    function set_insert(array, value, key){
-      var alreadyPresent = false;
-
-      if (key === undefined){
-        if ($.inArray(value, array) >= 0){ alreadyPresent = true; }
+    else if (keyups == keydowns){ reset($textbox); }
+  }
+  
+  var loopingTimer = {
+    run: function(task, interval, duration){
+      if (!loopingTimer.startTime){
+        loopingTimer.startTime = (new Date().getTime());
+        loopingTimer.running = setInterval(function(){
+          loopingTimer.run(task, interval, duration);
+        }, interval);
       }
-      else if ($.grep(array,
-                      function(obj){ return obj[key] == value[key]; }).length){
-        alreadyPresent = true;
+      else if (((new Date()).getTime() - loopingTimer.startTime) < duration){
+        task();
       }
-
-      if (!alreadyPresent){ array.push(value); }
-    }
-
-    function is_ascii(num){
-      return (num == 20 || (num > 64 && num < 91) || (num > 96 && num < 123));
-    }
-
-    // Array.prototype.matchesSet = function(other){
-      // return ($(this).not(other).get().length == 0 &&
-              // $(other).not(this).get().length == 0);
-    // };
-
-    function eval_key_event(e){
-      var eventCombo = {keyCodes: []};
-      // e.stopPropagation();
-      // e.preventDefault();
-      e = e.originalEvent || e;   // TODO: test without this
-      if (e.type == 'keydown'){ eventCombo = pressed; }
-      else { eventCombo = released; }
-
-      if (getKeyChar(e.keyCode) != undefined){
-        // set_insert(event_array, String.fromCharCode(e.keyCode).toUpperCase());
-        set_insert(eventCombo.keyCodes, e.keyCode);
+      else {
+        loopingTimer.stop();
       }
-      // if (e.keyCode == 91){ set_insert(event_array, meta_sign); }
-      // if (e.ctrlKey){ set_insert(event_array, ctrl_sign); }
-      // if (e.altKey){ set_insert(event_array, alt_sign); }
-      // if (e.shiftKey){ set_insert(event_array, shift_sign); }
-      // TODO: Test using metakey instead of this
-      // if (e.keyCode == 91){ eventCombo.metaKey = true; }
-      if (e.metaKey){ eventCombo.metaKey = true; }
-      if (e.ctrlKey){ eventCombo.ctrlKey = true; }
-      if (e.altKey){ eventCombo.altKey = true; }
-      if (e.shiftKey){ eventCombo.shiftKey = true; }
-      console.log('pressed', pressed);
-      console.log('released', released);
-    }
+    },
+    running: null,
+    stop: function(){
+      clearInterval(loopingTimer.running);
+      loopingTimer.startTime = null;
+    },
+    startTime: null
+  }
 
-    // $(document).keypress(function(e) {
-    // }).keydown(function(e){
-      // eval_key_event(e);
-    // }).keyup(function(e){
-      // eval_key_event(e);
-  // 
-    // if (released.length && released.matchesSet(pressed)){
-      // alert(pressed.join(delimiter));
-      // pressed = [];
-      // released = [];
-    // }
-    // });
+  function reset($textbox){
+    $textbox.val('');
+    completed = false;
+    comboData = new ComboData();
+    loopingTimer.stop();
+    keydowns = 0;
+    keyups = 0;    
+  }
 
-    function ComboPart(keyCode){
+  function ComboPart(keyCode){
+    if (keyCode !== undefined){
       this.keyCode = keyCode;
       this.keyChar = getKeyChar(keyCode);
     }
-
-    function buildComboData(){
-      var comboData = {
-        comboParts: [],
-        ctrlKey: pressed.ctrlKey || released.ctrlKey,
-        altKey: pressed.altKey || released.altKey,
-        metaKey: pressed.metaKey || released.metaKey,
-        shiftKey: pressed.shiftKey || released.shiftKey  
-      };
-
-      var allKeyCodes = pressed.keyCodes.concat(released.keyCodes);
-      console.log('allKeyCodes', allKeyCodes);
-      // for (i in allKeyCodes){
-        // if (getKeyChar(allKeyCodes[i])){
-          // set_insert(comboData.comboParts, new ComboPart(allKeyCodes[i]), 'keyCode');
-        // }
-      // }
-      $.each(allKeyCodes, function(i, keyCode){
-        if (getKeyChar(keyCode) != undefined){
-          set_insert(comboData.comboParts, new ComboPart(keyCode), 'keyCode');
-        }
-      });
-      comboData.comboString = $.map(comboData.comboParts, function(comboPart, i){
-                                return comboPart.keyChar;
-                              }).join(delimiter);
-      
-      return comboData;
-    }
-
-    init: function(){
-      // Introduce defaults that can be extended either
-      // globally or using an object literal.
-      this.config = $.extend({}, this.defaults, this.options,
-      this.metadata);
-
-      return this.each(function(){
-
-        $(this).keypress(function(e) {
-          console.log('keypress keycode', e.keyCode);
-          console.log('keypress charCode', e.charCode);
-          console.log(e);
-          e.stopPropagation();
-          e.preventDefault();
-          return false;
-        }).keydown(function(e){
-          console.log('keydown keycode', e.keyCode);
-          console.log('keydown originalEvent keycode', e.originalEvent.keyCode);
-          console.log(e);
-          eval_key_event(e);
-          // return false;
-        }).keyup(function(e){
-          console.log('keyup keycode', e.keyCode);
-          console.log(e);
-          eval_key_event(e);
-
-          // if (released.length && released.matchesSet(pressed)){
-          console.log('am', allModifiers());
-          console.log('!am', !allModifiers());
-          console.log('mm', modifiersMatch() && !allModifiers());
-          if (!allModifiers() &&
-            (released.keyCodes.length == pressed.keyCodes.length || modifiersMatch())){
-            console.log('xpressed', pressed);
-            console.log('xreleased', released);
-            // var keyComboData = {
-              // comboString: pressed.join(delimiter),
-            // }; 
-            var keyComboData = buildComboData();
-            $(this).val(keyComboData.comboString);
-            callback(keyComboData);
-            pressed = new EventCombo();
-            released = new EventCombo();
-          }
-          return false;
-        });
-
-      });
-    }
+  }
+  function ComboData(){
+    this.comboParts= [];
+    this.ctrlKey = false;
+    this.altKey = false;
+    this.metaKey = false;
+    this.shiftKey = false;
+    this.comboString = '';
   }
 
-  KeyCombinator.defaults = KeyCombinator.prototype.defaults;
+  var comboData = new ComboData();
+  var completed = false;
+  var keydowns = 0;
+  var keyups = 0;
+  var defaultCombo;
+  var onComplete;
 
-  $.fn.makeKeyCombinator = function(options) {
-    return this.each(function() {
-      new KeyCombinator(this, options).init();
+  $.fn.makeKeyCombinator = function(options){
+    return this.each(function(){
+      defaultCombo = options.defaultCombos;
+      onComplete = options.onComplete;
+
+      $(this).keydown(function(e){
+        completed = false;
+        keydowns += 1;
+        var $textbox = $(this);
+        eval_key_event(e, $textbox, onComplete);
+        if (e.keyCode == 18 && comboData.comboString == getKeyChar(18)){
+          var $textbox = $(this);
+          loopingTimer.run(function(){
+            var contents = $textbox.val();
+            if (undetected_key = accents[contents[contents.length - 1]]){
+              loopingTimer.stop();
+              eval_key_event(new $.Event('keydown', {keyCode: undetected_key}),
+                              $textbox,
+                              onComplete);
+            }
+          }, 10, 10000);
+        }
+        return false;
+      });
+      
+      $(this).keyup(function(e){
+        if (!completed){
+          keyups += 1;
+          eval_key_event(e, $(this), onComplete);
+        }
+        return false;
+      });
+
+      $(this).click(function(e){ $(this).select(); });
     });
-  };
+  }
 
-})(jQuery, window, document);
+  $.fn.clearKeyCombinator = function(){
+    return this.each(function(){ reset($(this)) }); 
+  }
+
+  $.fn.defaultKeyCombinator = function(){
+    return this.each(function(){
+      reset($(this));
+      for (keyChar in defaultCombo[platform]){
+        comboPart = new ComboPart();
+        comboPart.keyChar = keyChar;
+        set_insert(comboData.comboParts, comboPart, 'keyChar');
+      }
+      comboData.comboString = defaultCombo[platform].join(delimiter);
+      $(this).val(defaultCombo[platform].join(delimiter));
+      if(onComplete){ onComplete(comboData); }
+      comboData = new ComboData();
+    }); 
+  }
+
+})(jQuery);
