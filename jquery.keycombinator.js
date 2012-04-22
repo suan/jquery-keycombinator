@@ -1,4 +1,13 @@
-(function($){
+// The plugin logic hasn't been nested in a jQuery plugin. Instead, we just use
+// jQuery for its instantiation.
+;(function($, window, document, undefined){
+
+  // our plugin constructor
+  var KeyCombinator = function( elem, options ){
+      this.elem = elem;
+      this.$elem = $(elem);
+      this.options = options;
+    };
 
   ////// Private
   ////var _modProps = { 16: 'shiftKey', 17: 'ctrlKey', 18: 'altKey', 91: 'metaKey' };
@@ -322,4 +331,12 @@
     }); 
   }
 
-})(jQuery);
+  KeyCombinator.defaults = KeyCombinator.prototype.defaults;
+
+  $.fn.makeKeyCombinator = function(options) {
+    return this.each(function() {
+      new KeyCombinator(this, options).init();
+    });
+  };
+
+})(jQuery, window, document);
