@@ -7,6 +7,12 @@
       this.elem = elem;
       this.$elem = $(elem);
       this.options = options;
+
+      // This next line takes advantage of HTML5 data attributes
+      // to support customization of the plugin on a per-element
+      // basis. For example,
+      // <div class=item' data-plugin-options='{"message":"Goodbye World!"}'></div>
+      this.metadata = this.$elem.data( 'plugin-options' );
     };
 
 
@@ -191,6 +197,21 @@
     this.shiftKey = false;
     this.comboString = '';
   }
+
+  // if 'key' is passed in, it will be used as a key to match objects' uniqueness
+  function set_insert(array, value, key){
+    var alreadyPresent = false;
+
+    if (key === undefined){
+      if ($.inArray(value, array) >= 0){ alreadyPresent = true; }
+    }
+    else if ($.grep(array,
+                    function(obj){ return obj[key] == value[key]; }).length){
+      alreadyPresent = true;
+    }
+
+    if (!alreadyPresent){ array.push(value); }
+  }
     
   var loopingTimer = {
     run: function(task, interval, duration){
@@ -224,24 +245,18 @@
     defaults: {
     },
 
-    // if 'key' is passed in, it will be used as a key to match objects' uniqueness
-    function set_insert(array, value, key){
-      var alreadyPresent = false;
+    comboData: new ComboData(),
+    completed: false,
+    keydowns: 0,
+    keyups: 0,
+    defaultCombo: null,
+    onComplete: null,
 
-      if (key === undefined){
-        if ($.inArray(value, array) >= 0){ alreadyPresent = true; }
-      }
-      else if ($.grep(array,
-                      function(obj){ return obj[key] == value[key]; }).length){
-        alreadyPresent = true;
-      }
-
-      if (!alreadyPresent){ array.push(value); }
-    }
-
-    function eval_key_event(e, $textbox, callback){
+    eval_key_event: function(e, $textbox, callback){
       // e.stopPropagation();
       // e.preventDefault();
+      console.log(this.comboData);
+      comboData = this.comboData;
 
       loopingTimer.stop();
       var startComboLength = comboData.comboString.length;
@@ -261,87 +276,72 @@
         $textbox.focus();
         if (!isModifier(e.keyCode)){
           $textbox.select();
-          completed = true;
-          keyups = 0;
-          keydowns = 0;
+          this.completed = true;
+          this.keyups = 0;
+          this.keydowns = 0;
           loopingTimer.stop();
           if(callback){ callback(comboData); }
           comboData = new ComboData();
         }
       }
-      else if (keyups == keydowns){ reset($textbox); }
-    }
+      else if (this.keyups == this.keydowns){ this.reset($textbox); }
+    },
 
-    function reset($textbox){
+    reset: function($textbox){
       $textbox.val('');
-      completed = false;
-      comboData = new ComboData();
+      this.completed = false;
+      this.comboData = new ComboData();
       loopingTimer.stop();
-      keydowns = 0;
-      keyups = 0;    
-    }
+      this.keydowns = 0;
+      this.keyups = 0;    
+    },
 
-    var comboData = new ComboData();
-    var completed = false;
-    var keydowns = 0;
-    var keyups = 0;
-    var defaultCombo;
-    var onComplete;
+    // var comboData = new ComboData();
+    // var completed = false;
+    // var keydowns = 0;
+    // var keyups = 0;
+    // var defaultCombo;
+    // var onComplete;
 
     init: function(){
-      return this.each(function(){
-        defaultCombo = options.defaultCombos;
-        onComplete = options.onComplete;
+      // Introduce defaults that can be extended either
+      // globally or using an object literal.
+      this.config = $.extend({}, this.defaults, this.options, this.metadata);
 
-        $(this).keydown(function(e){
-          completed = false;
-          keydowns += 1;
-          var $textbox = $(this);
-          eval_key_event(e, $textbox, onComplete);
-          if (e.keyCode == 18 && comboData.comboString == getKeyChar(18)){
-            var $textbox = $(this);
-            loopingTimer.run(function(){
-              var contents = $textbox.val();
-              if (undetected_key = accents[contents[contents.length - 1]]){
-                loopingTimer.stop();
-                eval_key_event(new $.Event('keydown', {keyCode: undetected_key}),
-                                $textbox,
-                                onComplete);
-              }
-            }, 10, 10000);
-          }
-          return false;
-        });
-        
-        $(this).keyup(function(e){
-          if (!completed){
-            keyups += 1;
-            eval_key_event(e, $(this), onComplete);
-          }
-          return false;
-        });
+      defaultCombo = this.config.defaultCombos;
+      onComplete = this.config.onComplete;
+      $elem = this.$elem;
+      self = this;
 
-        $(this).click(function(e){ $(this).select(); });
-      });
-    }
-
-    $.fn.clearKeyCombinator = function(){
-      return this.each(function(){ reset($(this)) }); 
-    }
-
-    $.fn.defaultKeyCombinator = function(){
-      return this.each(function(){
-        reset($(this));
-        for (keyChar in defaultCombo[platform]){
-          comboPart = new ComboPart();
-          comboPart.keyChar = keyChar;
-          set_insert(comboData.comboParts, comboPart, 'keyChar');
+      $elem.keydown(function(e){
+        self.completed = false;
+        self.keydowns += 1;
+        var $textbox = $elem;
+        self.eval_key_event(e, $textbox, onComplete);
+        if (e.keyCode == 18 && self.comboData.comboString == getKeyChar(18)){
+          var $textbox = $elem;
+          loopingTimer.run(function(){
+            var contents = $textbox.val();
+            if (undetected_key = accents[contents[contents.length - 1]]){
+              loopingTimer.stop();
+              self.eval_key_event(new $.Event('keydown', {keyCode: undetected_key}),
+                              $textbox,
+                              onComplete);
+            }
+          }, 10, 10000);
         }
-        comboData.comboString = defaultCombo[platform].join(delimiter);
-        $(this).val(defaultCombo[platform].join(delimiter));
-        if(onComplete){ onComplete(comboData); }
-        comboData = new ComboData();
-      }); 
+        return false;
+      });
+      
+      $elem.keyup(function(e){
+        if (!self.completed){
+          self.keyups += 1;
+          self.eval_key_event(e, $elem, self.onComplete);
+        }
+        return false;
+      });
+
+      $elem.click(function(e){ $elem.select(); });
     }
   }
   // ================= /KeyCombinator.prototype ==================
@@ -355,5 +355,24 @@
       new KeyCombinator(this, options).init();
     });
   };
+
+  $.fn.clearKeyCombinator = function(){
+    return this.each(function(){ reset($(this)) }); 
+  }
+
+  $.fn.defaultKeyCombinator = function(){
+    return this.each(function(){
+      reset($(this));
+      for (keyChar in defaultCombo[platform]){
+        comboPart = new ComboPart();
+        comboPart.keyChar = keyChar;
+        set_insert(comboData.comboParts, comboPart, 'keyChar');
+      }
+      comboData.comboString = defaultCombo[platform].join(delimiter);
+      $(this).val(defaultCombo[platform].join(delimiter));
+      if(onComplete){ onComplete(comboData); }
+      comboData = new ComboData();
+    }); 
+  }
 
 })(jQuery, window, document);
