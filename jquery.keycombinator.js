@@ -256,7 +256,7 @@
       // e.stopPropagation();
       // e.preventDefault();
       console.log('eval_key called');
-      comboData = this.comboData;
+      var comboData = this.comboData;
 
       loopingTimer.stop();
       var startComboLength = comboData.comboString.length;
@@ -331,9 +331,9 @@
       this.$elem.data('keycombinator-config', this.config);
 
       this.defaultCombo = this.config.defaultCombos;
-      onComplete = this.config.onComplete;
-      $elem = this.$elem;
-      self = this;
+      var onComplete = this.config.onComplete;
+      var $elem = this.$elem;
+      var self = this;
 
       $elem.keydown(function(e){
         self.completed = false;
