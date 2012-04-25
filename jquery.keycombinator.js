@@ -255,7 +255,7 @@
     eval_key_event: function(e, $textbox, callback){
       // e.stopPropagation();
       // e.preventDefault();
-      console.log(this.comboData);
+      console.log('eval_key called');
       comboData = this.comboData;
 
       loopingTimer.stop();
@@ -270,8 +270,11 @@
       comboData.comboString = $.map(comboData.comboParts, function(comboPart, i){
                                 return comboPart.keyChar;
                               }).join(delimiter);
+      console.log('comboString', comboData.comboString);
+      console.log('startComboLeng', startComboLength);
       if (comboData.comboString.length > startComboLength){
         $textbox.blur();  // needed for FF mac accent key hack
+        console.log(comboData.comboString);
         $textbox.val(comboData.comboString);
         $textbox.focus();
         if (!isModifier(e.keyCode)){
@@ -281,13 +284,15 @@
           this.keydowns = 0;
           loopingTimer.stop();
           if(callback){ callback(comboData); }
-          comboData = new ComboData();
+          this.comboData = new ComboData();
+          console.log('complete and comboData reset');
         }
       }
       else if (this.keyups == this.keydowns){ this.reset($textbox); }
     },
 
     reset: function($textbox){
+      console.log('reset called!');
       $textbox.val('');
       this.completed = false;
       this.comboData = new ComboData();
@@ -336,7 +341,7 @@
       $elem.keyup(function(e){
         if (!self.completed){
           self.keyups += 1;
-          self.eval_key_event(e, $elem, self.onComplete);
+          self.eval_key_event(e, $elem, onComplete);
         }
         return false;
       });
@@ -357,7 +362,10 @@
   };
 
   $.fn.clearKeyCombinator = function(){
-    return this.each(function(){ reset($(this)) }); 
+    return this.each(function(){
+      // reset($(this))
+      new KeyCombinator(this).reset($(this));
+    }); 
   }
 
   $.fn.defaultKeyCombinator = function(){
