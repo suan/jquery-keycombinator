@@ -301,6 +301,21 @@
       this.keyups = 0;    
     },
 
+    revertToDefault: function(){
+      var defaultCombo = this.$elem.data('keycombinator-config').defaultCombos;
+
+      this.reset(this.$elem);
+      for (keyChar in defaultCombo[platform]){
+        this.comboPart = new ComboPart();
+        this.comboPart.keyChar = keyChar;
+        set_insert(this.comboData.comboParts, this.comboPart, 'keyChar');
+      }
+      this.comboData.comboString = defaultCombo[platform].join(delimiter);
+      this.$elem.val(defaultCombo[platform].join(delimiter));
+      if(this.onComplete){ this.onComplete(this.comboData); }
+      this.comboData = new ComboData();
+    },
+
     // var comboData = new ComboData();
     // var completed = false;
     // var keydowns = 0;
@@ -312,8 +327,10 @@
       // Introduce defaults that can be extended either
       // globally or using an object literal.
       this.config = $.extend({}, this.defaults, this.options, this.metadata);
+      // attach configuration to element for later retrieval
+      this.$elem.data('keycombinator-config', this.config);
 
-      defaultCombo = this.config.defaultCombos;
+      this.defaultCombo = this.config.defaultCombos;
       onComplete = this.config.onComplete;
       $elem = this.$elem;
       self = this;
@@ -370,16 +387,8 @@
 
   $.fn.defaultKeyCombinator = function(){
     return this.each(function(){
-      reset($(this));
-      for (keyChar in defaultCombo[platform]){
-        comboPart = new ComboPart();
-        comboPart.keyChar = keyChar;
-        set_insert(comboData.comboParts, comboPart, 'keyChar');
-      }
-      comboData.comboString = defaultCombo[platform].join(delimiter);
-      $(this).val(defaultCombo[platform].join(delimiter));
-      if(onComplete){ onComplete(comboData); }
-      comboData = new ComboData();
+      // reset($(this));
+      new KeyCombinator(this).revertToDefault();
     }); 
   }
 
