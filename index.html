@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+  <!-- <link rel="stylesheet" href="twitter-bootstrap/docs/assets/css/bootstrap.css"> -->
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="jquery.keycombinator.js"></script>
+  <link href="prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="prettify/prettify.js"></script>
+  <style type="text/css">
+  .container-fluid {
+    padding: 20px;
+  }
+  /* h1 { */
+    /* margin-bottom: 10px;   */
+  /* } */
+  /* h6 { */
+    /* display: inline; */
+  /* } */
+  .combo-pane {
+    margin: 10px 0;
+  }
+  .right-box {
+    margin-left: 5px;  
+  }
+  button {
+    cursor: auto;
+  }
+  #output1, #output2 {
+    height: 400px;
+    max-height: 400px;
+  }
+  pre.prettyprint {
+    border-color: whiteSmoke;
+    padding: 10px;
+    overflow: auto;
+    word-wrap: normal;
+    white-space: pre;
+  }
+  </style>
+  <script type="text/javascript">
+
+    function outputPrint(obj){
+      $('#output').val($('#output').val() + JSON.stringify(obj, null, 2) + '\n\n');
+    }
+
+    function outputReplace(obj){
+      $('#output').html(JSON.stringify(obj, null, 2) + '\n\n');
+    }
+
+    $(document).ready(function(){
+      $('#keyComboInput1').makeKeyCombinator({
+        onComplete: function(keyComboData){
+          $('#output1').html(JSON.stringify(keyComboData, null, 2) + '\n\n');
+        }
+      });
+
+      $('#keyComboInput2').makeKeyCombinator({
+        defaultCombos: {
+          mac: ['⌃', 'F'],
+          win: ['Ctrl', 'F'],
+          unix: ['Ctrl', 'F']
+        },
+        onComplete: function(keyComboData){
+          $('#output2').html(JSON.stringify(keyComboData, null, 2) + '\n\n');
+        }
+      });
+
+      $('#clearBtn').click(function(){
+        $('#keyComboInput2').clearKeyCombinator();
+      });
+      $('#resetBtn').click(function(){
+        $('#keyComboInput2').defaultKeyCombinator();
+      });
+    });
+
+  </script>
+</head>
+<body onload="prettyPrint()">
+<div class='container-fluid'>
+  <div class="row-fluid">
+    <div class="span12">
+      <div class="hero-unit">
+        <h1>jquery.keycombinator</h1>
+        <p>
+          jquery.keycombinator is a do-it-all plugin to let your users define keyboard shortcuts. Simply slap it onto an input box and it will detect any entered key combinations and provide detailed data in a callback function, with OS-specific key symbols. Try it out!
+        </p>
+        <p>
+          <a href="#" class="btn btn-primary btn-large">Download</a> | 
+          <a href="#" class="btn btn-primary btn-large">View on Github</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row-fluid">
+    <div class="span12">
+      <h2>Basic Usage</h2>
+      <div class="combo-pane">
+        Enter a key combination
+        <input type="text" name="keycombo" id="keyComboInput1" class="right-box"/>
+      </div>
+    </div>
+  </div>
+  <div class="row-fluid">
+    <div class="span6">
+      <h3>Output</h3>
+      <pre class="prettyprint pre-scrollable" id="output1"></pre>
+    </div>
+
+    <div class="span6" style="vertical-align:center;">
+      <h3>Source</h3>
+      <pre class="prettyprint">
+$('#keyComboInput1').makeKeyCombinator({
+  onComplete: function(keyComboData){
+    $('#output1').html(JSON.stringify(keyComboData, null, 2));
+  }
+});
+      </pre>
+    </div>
+  </div>
+
+  <div class="row-fluid">
+    <div class="span12">
+      <h2>With "clear" and "revert to default" functionality</h2>
+      <div class="combo-pane">
+        Enter a key combination
+        <input type="text" name="keycombo" id="keyComboInput2" class="right-box"/>
+        <span class="right-box">
+          <button id="clearBtn">Clear</button>
+          <button id="resetBtn">Reset to Default</button>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="row-fluid">
+    <div class="span6">
+      <h3>Output</h3>
+      <pre class="prettyprint pre-scrollable" id="output2"></pre>
+    </div>
+
+    <div class="span6" style="vertical-align:center;">
+      <h3>Source</h3>
+      <pre class="prettyprint">
+$('#keyComboInput2').makeKeyCombinator({
+  defaultCombos: {
+    mac: ['⌃', 'F'],
+    win: ['Ctrl', 'F'],
+    unix: ['Ctrl', 'F']
+  },
+  onComplete: function(keyComboData){
+    $('#output2').html(JSON.stringify(keyComboData, null, 2));
+  }
+});
+
+$('#clearBtn').click(function(){
+  $('#keyComboInput2').clearKeyCombinator();
+});
+$('#resetBtn').click(function(){
+  $('#keyComboInput2').defaultKeyCombinator();
+});
+      </pre>
+    </div>
+  </div>
+</div>
+</body>
+</html>
