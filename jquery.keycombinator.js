@@ -13,6 +13,13 @@
       // basis. For example,
       // <div class=item' data-plugin-options='{"message":"Goodbye World!"}'></div>
       this.metadata = this.$elem.data( 'plugin-options' );
+
+      this.comboData = new ComboData();
+      this.completed = false;
+      this.keydowns = 0;
+      this.keyups = 0;
+      this.defaultCombo = null;
+      this.onComplete = null;
     };
 
 
@@ -245,13 +252,6 @@
     defaults: {
     },
 
-    comboData: new ComboData(),
-    completed: false,
-    keydowns: 0,
-    keyups: 0,
-    defaultCombo: null,
-    onComplete: null,
-
     eval_key_event: function(e, $textbox, callback){
       // e.stopPropagation();
       // e.preventDefault();
@@ -315,13 +315,6 @@
       if(this.onComplete){ this.onComplete(this.comboData); }
       this.comboData = new ComboData();
     },
-
-    // var comboData = new ComboData();
-    // var completed = false;
-    // var keydowns = 0;
-    // var keyups = 0;
-    // var defaultCombo;
-    // var onComplete;
 
     init: function(){
       // Introduce defaults that can be extended either
