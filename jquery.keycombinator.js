@@ -373,14 +373,12 @@
 
   $.fn.clearKeyCombinator = function(){
     return this.each(function(){
-      // reset($(this))
       new KeyCombinator(this).reset($(this));
     }); 
   }
 
   $.fn.defaultKeyCombinator = function(){
     return this.each(function(){
-      // reset($(this));
       new KeyCombinator(this).revertToDefault();
     }); 
   }
