@@ -25,9 +25,9 @@ Attach jquery.keycombinator to your keycombo input boxes:
 ```js
 $('#myKeyComboInput').makeKeyCombinator({
   defaultCombos: {
-    mac: ['⌃', 'F'],
-    win: ['Ctrl', 'F'],
-    unix: ['Ctrl', 'F']
+    mac: ['⌃', '⇧', 'F'],
+    win: ['Ctrl', 'Shift', 'F'],
+    unix: ['Ctrl', 'Shift', 'F']
   },
   onComplete: function(keyComboData){
     console.log(keyComboData);
@@ -67,9 +67,9 @@ __defaultCombos__: The keycombo to reset to when `defaultKeyCombinator()` is cal
 
 ```js
 defaultCombos: {
-  mac: ['⌃', 'F'],
-  win: ['Ctrl', 'F'],
-  unix: ['Ctrl', 'F']
+  mac: ['⌃', '⇧', 'F'],
+  win: ['Ctrl', 'Shift', 'F'],
+  unix: ['Ctrl', 'Shift', 'F']
 }
 ```
 
