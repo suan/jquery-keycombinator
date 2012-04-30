@@ -14,12 +14,18 @@
       // <div class=item' data-plugin-options='{"message":"Goodbye World!"}'></div>
       this.metadata = this.$elem.data( 'plugin-options' );
 
+      // Introduce defaults that can be extended either
+      // globally or using an object literal.
+      this.config = $.extend({}, this.defaults, this.options, this.metadata);
+      // attach configuration to element for later retrieval
+      this.$elem.data('keycombinator-config', this.config);
+
+      this.defaultCombo = this.config.defaultCombos;
+      this.onComplete = this.config.onComplete;
       this.comboData = new ComboData();
       this.completed = false;
       this.keydowns = 0;
       this.keyups = 0;
-      this.defaultCombo = null;
-      this.onComplete = null;
     };
 
 
@@ -317,14 +323,7 @@
     },
 
     init: function(){
-      // Introduce defaults that can be extended either
-      // globally or using an object literal.
-      this.config = $.extend({}, this.defaults, this.options, this.metadata);
-      // attach configuration to element for later retrieval
-      this.$elem.data('keycombinator-config', this.config);
-
-      this.defaultCombo = this.config.defaultCombos;
-      var onComplete = this.config.onComplete;
+      var onComplete = this.onComplete;
       var $elem = this.$elem;
       var self = this;
 
