@@ -59,9 +59,9 @@
 
       $('#keyComboInput2').makeKeyCombinator({
         defaultCombos: {
-          mac: ['⌃', 'F'],
-          win: ['Ctrl', 'F'],
-          unix: ['Ctrl', 'F']
+          mac: ['⌃', '⇧', 'F'],
+          win: ['Ctrl', 'Shift', 'F'],
+          unix: ['Ctrl', 'Shift', 'F']
         },
         onComplete: function(keyComboData){
           $('#output2').html(JSON.stringify(keyComboData, null, 2) + '\n\n');
@@ -170,9 +170,9 @@ $('#keyComboInput1').makeKeyCombinator({
       <pre class="prettyprint">
 $('#keyComboInput2').makeKeyCombinator({
   defaultCombos: {
-    mac: ['⌃', 'F'],
-    win: ['Ctrl', 'F'],
-    unix: ['Ctrl', 'F']
+    mac: ['⌃', '⇧', 'F'],
+    win: ['Ctrl', 'Shift', 'F'],
+    unix: ['Ctrl', 'Shift', 'F']
   },
   onComplete: function(keyComboData){
     $('#output2').html(JSON.stringify(keyComboData, null, 2));
