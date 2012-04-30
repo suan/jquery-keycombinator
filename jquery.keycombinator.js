@@ -13,12 +13,16 @@
       // basis. For example,
       // <div class=item' data-plugin-options='{"message":"Goodbye World!"}'></div>
       this.metadata = this.$elem.data( 'plugin-options' );
+      var cached = this.$elem.data('keycombinator-config');
 
       // Introduce defaults that can be extended either
       // globally or using an object literal.
-      this.config = $.extend({}, this.defaults, this.options, this.metadata);
-      // attach configuration to element for later retrieval
-      this.$elem.data('keycombinator-config', this.config);
+      this.config = $.extend( {},
+                              this.defaults,
+                              cached,
+                              this.options,
+                              this.metadata
+                            );
 
       this.defaultCombo = this.config.defaultCombos;
       this.onComplete = this.config.onComplete;
@@ -308,13 +312,14 @@
     },
 
     revertToDefault: function(){
-      var defaultCombo = this.$elem.data('keycombinator-config').defaultCombos;
+      var defaultCombo = this.defaultCombo;
 
       this.reset(this.$elem);
-      for (keyChar in defaultCombo[platform]){
-        this.comboPart = new ComboPart();
-        this.comboPart.keyChar = keyChar;
-        set_insert(this.comboData.comboParts, this.comboPart, 'keyChar');
+      for (var i = 0; i < defaultCombo[platform].length; i++){
+        var comboPart = new ComboPart();
+        comboPart.keyChar = defaultCombo[platform][i];
+        console.log(comboPart.keyChar);
+        set_insert(this.comboData.comboParts, comboPart, 'keyChar');
       }
       this.comboData.comboString = defaultCombo[platform].join(delimiter);
       this.$elem.val(defaultCombo[platform].join(delimiter));
@@ -323,6 +328,9 @@
     },
 
     init: function(){
+      // attach configuration to element for later retrieval
+      this.$elem.data('keycombinator-config', this.config);
+
       var onComplete = this.onComplete;
       var $elem = this.$elem;
       var self = this;
