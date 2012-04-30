@@ -19,7 +19,7 @@ First, include the plugin in pages you want to use it. For example in plain HTML
 <script src="path/to/jquery.keycombinator.min.js" type="text/javascript"></script>
 ```
 
-### Basic
+### Setup
 Attach jquery.keycombinator to your keycombo input boxes:
 
 ```js
@@ -36,24 +36,54 @@ $('#myKeyComboInput').makeKeyCombinator({
 ```
 
 ### Clearing
-Clear a keycombinator box upon clicking a button. :
+Clear a keycombinator box upon clicking a button. The configured `onComplete` callback will be called with an empty `keyComboData`:
+
+```
+$('#clearBtn').click(function(){
+  $('#myKeyComboInput').clearKeyCombinator();
+});
+```
 
 ### Reset to Defaults
-Reset a keycombinator to its default value 
+Reset a keycombinator to its default value upon clickng a button. The configured `onComplete` callback will be called with the `defaultCombo` specific to the current OS:
+
+```
+$('#resetBtn').click(function(){
+  $('#myKeyComboInput').defaultKeyCombinator();
+});
+```
 
 Options
 -------
+__onComplete__ _(required)_: Callback function triggered when a key combination has been detected, allowing you to make use of the key combination data. Needs a single argument, which is the variable containing the keycombo data. Example:
+
+```js
+onComplete: function(keyComboData){ console.log(keyComboData); }
+```
+
+==================
+
+__defaultCombos__: The keycombo to reset to when `defaultKeyCombinator()` is called. Should contain an array of OS-styled chars for each of the 3 keys `mac`, `win`, and `unix`. Required if you plan to call `defaultKeyCombinator()`. Example:
+
+```js
+defaultCombos: {
+  mac: ['⌃', 'F'],
+  win: ['Ctrl', 'F'],
+  unix: ['Ctrl', 'F']
+}
+```
 
 Returned Data
 -------------
-stored in the variable:
+Here's what's stored in the callback variable:
 
-- comboString (string): A user-friendly string for the key combo that's tailored to the current OS
-- comboParts (array): Array of all the parts of the key combo. Each element is an object with the following:
-  - keyChar (char): the actual key character
-  - keyCode (integer): the keyCode of the pressed key (not included in `defaultKeyCombinator()` callbacks)
-- ctrlKey (boolean): Indicates whether the key combo includes a ctrl key
-- altKey (boolean): Indicates whether the key combo includes an alt key
+- `comboString` (string): A user-friendly string for the key combo that's tailored to the current OS
+- `comboParts` (array): Array of all the parts of the key combo. Each element is an object with the following:
+  - `keyChar` (char): the actual key character
+  - `keyCode` (integer): the keyCode of the pressed key (not included in `defaultKeyCombinator()` callbacks)
+- `ctrlKey` (boolean): Indicates whether the key combo includes a ctrl key
+- `altKey` (boolean): Indicates whether the key combo includes an alt key
+- `shiftKey` (boolean): Indicates whether the key combo includes an shift key
 
 Browser Support
 ---------------
