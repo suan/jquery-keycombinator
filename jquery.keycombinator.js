@@ -265,7 +265,6 @@
     eval_key_event: function(e, $textbox, callback){
       // e.stopPropagation();
       // e.preventDefault();
-      console.log('eval_key called');
       var comboData = this.comboData;
 
       loopingTimer.stop();
@@ -280,11 +279,8 @@
       comboData.comboString = $.map(comboData.comboParts, function(comboPart, i){
                                 return comboPart.keyChar;
                               }).join(delimiter);
-      console.log('comboString', comboData.comboString);
-      console.log('startComboLeng', startComboLength);
       if (comboData.comboString.length > startComboLength){
         $textbox.blur();  // needed for FF mac accent key hack
-        console.log(comboData.comboString);
         $textbox.val(comboData.comboString);
         $textbox.focus();
         if (!isModifier(e.keyCode)){
@@ -295,14 +291,12 @@
           loopingTimer.stop();
           if(callback){ callback(comboData); }
           this.comboData = new ComboData();
-          console.log('complete and comboData reset');
         }
       }
       else if (this.keyups == this.keydowns){ this.reset($textbox); }
     },
 
     reset: function($textbox){
-      console.log('reset called!');
       $textbox.val('');
       this.completed = false;
       this.comboData = new ComboData();
@@ -318,7 +312,6 @@
       for (var i = 0; i < defaultCombo[platform].length; i++){
         var comboPart = new ComboPart();
         comboPart.keyChar = defaultCombo[platform][i];
-        console.log(comboPart.keyChar);
         set_insert(this.comboData.comboParts, comboPart, 'keyChar');
       }
       this.comboData.comboString = defaultCombo[platform].join(delimiter);
