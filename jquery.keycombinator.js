@@ -302,7 +302,12 @@
       this.comboData = new ComboData();
       loopingTimer.stop();
       this.keydowns = 0;
-      this.keyups = 0;    
+      this.keyups = 0;
+    },
+
+    clear: function(){
+      this.reset(this.$elem);
+      if(this.onComplete){ this.onComplete(this.comboData); }
     },
 
     revertToDefault: function(){
@@ -373,7 +378,7 @@
 
   $.fn.clearKeyCombinator = function(){
     return this.each(function(){
-      new KeyCombinator(this).reset($(this));
+      new KeyCombinator(this).clear();
     }); 
   }
 
