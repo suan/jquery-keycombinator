@@ -1,6 +1,6 @@
 jquery.keycombinator
 ====================
-jquery.keycombinator is a do-it-all plugin to let your users define keyboard shortcuts. Simply slap it onto an input box and it will detect any entered key combinations and provide detailed data in a callback function, with OS-specific key symbols. [**Try out the demo**][demo]!
+jquery.keycombinator is a do-it-all plugin to let your _users_ define keyboard shortcuts. Simply slap it onto an input box and it will detect any entered key combinations and provide detailed data in a callback function, with OS-specific key symbols. [**Try out the demo**][demo]!
 
 Installation
 ------------
@@ -51,7 +51,7 @@ stored in the variable:
 - comboString (string): A user-friendly string for the key combo that's tailored to the current OS
 - comboParts (array): Array of all the parts of the key combo. Each element is an object with the following:
   - keyChar (char): the actual key character
-  - keyCode (integer): the keyCode of the pressed key
+  - keyCode (integer): the keyCode of the pressed key (not included in `defaultKeyCombinator()` callbacks)
 - ctrlKey (boolean): Indicates whether the key combo includes a ctrl key
 - altKey (boolean): Indicates whether the key combo includes an alt key
 
@@ -73,7 +73,11 @@ Apart from combinations already used by the OS and browser, these are key combin
 
 Credits
 -------
+Huge kudos to the [jwerty project][jwerty], which this is sort of a reverse of, and which introduced me to the wonderful world of Mac modifier key symbols.
+
+
 
 [demo]: http://suan.github.com/jquery-keycombinator/ 
-[zip]: l
-[tar]: l
+[zip]: https://github.com/suan/jquery-keycombinator/zipball/master
+[tar]: https://github.com/suan/jquery-keycombinator/tarball/master
+[jwerty]: http://keithcirkel.co.uk/jwerty/
