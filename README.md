@@ -55,7 +55,7 @@ $('#resetBtn').click(function(){
 
 Options
 -------
-__onComplete__ _(required)_: Callback function triggered when a key combination has been detected, allowing you to make use of the key combination data. Needs a single argument, which is the variable containing the keycombo data. Example:
+__onComplete__ _(required)_: Callback function triggered when a key combination has been detected, allowing you to make use of the key combination data - to save in localStorage for use on other pages, for example. It needs a single argument, which is the variable containing the keycombo data. Example:
 
 ```js
 onComplete: function(keyComboData){ console.log(keyComboData); }
