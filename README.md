@@ -89,8 +89,8 @@ Browser Support
 ---------------
 jquery.keycombinator has been tested on new versions of Chrome, Safari, Firefox, and IE. It's not guaranteed to work in other browsers.
 
-Known Issues
-------------
+Issues
+------
 Apart from combinations already used by the OS and browser, these are key combinations that are known not to work (in any permutation):
 
 - Mac
@@ -100,6 +100,8 @@ Apart from combinations already used by the OS and browser, these are key combin
       - ⌃⌥`
       - ⌃⌥←
       - ⌃⌥→
+
+If you discover any other issues, or have feature requests, I'd prefer you create an issue [on github][github-issues]. However, if you don't want to setup a github account, feel free to email me at yeosuanaik@gmail.com.
 
 Credits
 -------
@@ -115,3 +117,4 @@ You'll likely want to  use another library to translate the entered keycombos in
 [zip]: https://github.com/suan/jquery-keycombinator/zipball/master
 [tar]: https://github.com/suan/jquery-keycombinator/tarball/master
 [jwerty]: http://keithcirkel.co.uk/jwerty/
+[github-issues]: https://github.com/suan/jquery-keycombinator/issues
