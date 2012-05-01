@@ -105,6 +105,10 @@ Credits
 -------
 Huge kudos to the [jwerty project][jwerty], which this is sort of a reverse of, and which introduced me to the wonderful world of Mac modifier key symbols.
 
+What Next?
+----------
+You'll likely want to  use another library to translate the entered keycombos into actual actions. And for that, I recommend [jwerty][jwerty] as well - it's solid and recognizes the special key symbols.
+
 
 
 [demo]: http://suan.github.com/jquery-keycombinator/ 
