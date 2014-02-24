@@ -76,7 +76,7 @@
     45: {all: 'Ins'},
     // Delete key, on Mac: ⌫ (Delete)
     46: {mac: '⌫ ', win: 'Del', unix: 'Del'},
-    
+
     // Left Arrow Key, or ←
     37: {mac: '←',  win: 'Left Arrow', unix: 'Left Arrow'},
     // Up Arrow Key, or ↑
@@ -85,7 +85,7 @@
     39: {mac: '→', win: 'Right Arrow', unix: 'Right Arrow'},
     // Up Arrow Key, or ↓
     40: {mac: '↓', win: 'Down Arrow', unix: 'Down Arrow'},
-    
+
     // odities, printing characters that come out wrong:
     // Num-Multiply, or *
     106: {all: '*'},
@@ -108,7 +108,7 @@
     190: {all: '.'},
     // Slash, or /, or forward-slash
     191: {all: '/'},
-    // Tick, or `, or back-quote 
+    // Tick, or `, or back-quote
     192: {all: '`'},
     // Open bracket, or [
     219: {all: '['},
@@ -154,7 +154,7 @@
     'ˆ': 73,    // I
     '˜': 78     // N
   };
-    
+
   function getKeyChar(keyCode){
     if (key = keys[keyCode]){
       if (key.all != undefined){return key.all;}
@@ -173,7 +173,7 @@
           ////'⌘': 91, meta: 91, cmd: 91, 'super': 91, win: 91
       ////},
   }
-    
+
   var delimiter = '+';
   var shift_sign = 'shift';
   var meta_sign = 'super';
@@ -190,7 +190,7 @@
     platform = 'win';
   }
   else{
-    platform = 'unix';  
+    platform = 'unix';
   }
 
   var modifiers = ['ctrlKey', 'altKey', 'shiftKey', 'metaKey'];
@@ -229,7 +229,7 @@
 
     if (!alreadyPresent){ array.push(value); }
   }
-    
+
   var loopingTimer = {
     run: function(task, interval, duration){
       if (!loopingTimer.startTime){
@@ -269,6 +269,11 @@
 
       loopingTimer.stop();
       var startComboLength = comboData.comboString.length;
+
+      if ($.inArray(getKeyChar(e.keyCode), this.options.filterKeys) >= 0){
+        return null;
+      }
+
       if (getKeyChar(e.keyCode) != undefined){
         set_insert(comboData.comboParts, new ComboPart(e.keyCode), 'keyCode');
       }
@@ -352,7 +357,7 @@
         }
         return false;
       });
-      
+
       $elem.keyup(function(e){
         if (!self.completed){
           self.keyups += 1;
@@ -379,13 +384,13 @@
   $.fn.clearKeyCombinator = function(){
     return this.each(function(){
       new KeyCombinator(this).clear();
-    }); 
+    });
   }
 
   $.fn.defaultKeyCombinator = function(){
     return this.each(function(){
       new KeyCombinator(this).revertToDefault();
-    }); 
+    });
   }
 
 })(jQuery, window, document);
